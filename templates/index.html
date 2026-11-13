@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-4 p-md-5 mb-4 rounded-4 text-white" style="background:linear-gradient(135deg,#4338ca,#7c3aed)">
+  <h1 class="fw-bold">Buat surat resmi dalam hitungan detik <i class="bi bi-lightning-charge-fill text-warning"></i></h1>
+  <p class="mb-0 opacity-75 fs-5">Pilih template, isi data, lihat pratinjau langsung, lalu cetak atau simpan ke arsip dengan nomor surat otomatis.</p>
+</div>
+
+<div class="row g-3 mb-4">
+  {% for label, nilai, ikon in [("Total Surat", total, "bi-files"), ("Surat Bulan Ini", bulan_ini, "bi-calendar-check"), ("Template Tersedia", surat|length, "bi-layout-text-window")] %}
+  <div class="col-md-4"><div class="card p-3 d-flex flex-row align-items-center gap-3">
+    <div class="tpl-icon" style="width:48px;height:48px;font-size:1.3rem"><i class="bi {{ ikon }}"></i></div>
+    <div><div class="h3 mb-0 fw-bold">{{ nilai }}</div><small class="text-muted">{{ label }}</small></div>
+  </div></div>
+  {% endfor %}
+</div>
+
+<h2 class="h5 fw-bold mb-3">Pilih Jenis Surat</h2>
+<div class="row g-3 mb-4">
+  {% for key, t in surat.items() %}
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('buat', jenis=key) }}" class="card tpl-card h-100 p-4">
+      <div class="tpl-icon mb-3"><i class="bi {{ t.ikon }}"></i></div>
+      <h3 class="h6 fw-bold">{{ t.nama }}</h3>
+      <span class="badge text-bg-light border align-self-start">{{ t.kategori }}</span>
+      <small class="text-muted mt-3">{{ per_jenis.get(key, 0) }} surat dibuat</small>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card"><div class="card-body">
+  <h2 class="h5 fw-bold mb-3">Surat Terbaru</h2>
+  <ul class="list-group list-group-flush">
+    {% for r in terbaru %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div><a class="fw-medium text-decoration-none" href="{{ url_for('lihat', sid=r.id) }}">{{ r.judul }}</a>
+        <div class="small text-muted">{{ r.nomor }} &bull; {{ r.dibuat }}</div></div>
+      <a href="{{ url_for('lihat', sid=r.id) }}" class="btn btn-sm btn-outline-primary">Buka</a>
+    </li>
+    {% else %}
+    <li class="list-group-item text-center text-muted py-4">Belum ada surat. Pilih template di atas untuk memulai.</li>
+    {% endfor %}
+  </ul>
+</div></div>
+{% endblock %}

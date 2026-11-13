@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ row.nomor }} - SuratKu{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 mb-3 no-print">
+  <a href="{{ url_for('arsip') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Arsip</a>
+  <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer-fill"></i> Cetak / Simpan PDF</button>
+  <a href="{{ url_for('buat', jenis=row.jenis) }}" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Buat Baru</a>
+</div>
+{% include "_kertas.html" %}
+<script>renderKertas({tpltojson }, { datatojson });</script>
+{% endblock %}

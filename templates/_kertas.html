@@ -1,0 +1,42 @@
+<style>
+  .kertas { background:#fff; max-width:794px; margin:0 auto; padding:48px 56px; min-height:600px; font-family:"Times New Roman",serif;
+            font-size:12pt; line-height:1.5; color:#000; box-shadow:0 8px 30px rgba(0,0,0,.15); border-radius:4px; }
+  .kertas .kop { text-align:center; border-bottom:3px double #000; padding-bottom:8px; margin-bottom:18px; }
+  .kertas .kop h5 { margin:0; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+  .kertas .kosong { background:#fef3c7; color:#92400e; font-size:.85em; }
+  .kertas p { margin:0 0 10px; text-align:justify; }
+  .kertas td { padding:0 8px 0 0; vertical-align:top; }
+  @media print { .kertas { box-shadow:none; padding:0; max-width:none; } }
+</style>
+<div class="kertas" id="kertas"></div>
+<script>
+  function renderKertas(tpl, d) {
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const tglID = s => { const t = new Date(s + "T00:00:00"); return isNaN(t) ? s :
+      t.toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }); };
+    const tipe = {}; tpl.fields.forEach(f => tipe[f[0]] = f[2]);
+    const isi = txt => txt.replace(/\{(\w+)\}/g, (m, k) => {
+      const v = (d[k] || "").trim();
+      return v ? esc(tipe[k] === "date" ? tglID(v) : v) : `<span class="kosong">[${k}]</span>`;
+    });
+    const t = d.tanggal ? new Date(d.tanggal + "T00:00:00") : new Date();
+    const romawi = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][t.getMonth()];
+    const nomor = d.nomor || `...../${tpl.kode}/${romawi}/${t.getFullYear()}`;
+    const paragraf = isi(tpl.isi).split("\n\n").map(p => {
+      const baris = p.split("\n");
+      if (baris.length > 1 && baris.every(b => b.includes(" : ")))
+        return "<table>" + baris.map(b => { const [a, ...c] = b.split(" : ");
+          return `<tr><td>${a}</td><td>:</td><td>${c.join(" : ")}</td></tr>`; }).join("") + "</table><div style='height:10px'></div>";
+      return "<p>" + baris.join("<br>") + "</p>";
+    }).join("");
+    document.getElementById("kertas").innerHTML = `
+      ${d.instansi ? `<div class="kop"><h5>${esc(d.instansi)}</h5><div>${esc(d.alamat || "")}</div></div>` : ""}
+      <div style="text-align:right">${esc(d.kota || "")}, ${d.tanggal ? tglID(d.tanggal) : ""}</div>
+      <table style="margin:10px 0"><tr><td>Nomor</td><td>:</td><td>${esc(nomor)}</td></tr>
+        <tr><td>Hal</td><td>:</td><td><b>${isi(tpl.hal)}</b></td></tr></table>
+      <p>Kepada Yth.<br>${isi(tpl.kepada).replace(/\n/g, "<br>")}</p>
+      ${paragraf}
+      <div style="margin-top:30px; margin-left:55%">Hormat kami,<br><br><br><br>
+        <b><u>${esc(d.ttd_nama || "")}</u></b><br>${esc(d.ttd_jabatan || "")}</div>`;
+  }
+</script>

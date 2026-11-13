@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ tpl.nama }} - SuratKu{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-3 no-print">
+  <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+  <h1 class="h4 fw-bold mb-0">{{ tpl.nama }}</h1>
+</div>
+<div class="row g-4">
+  <div class="col-lg-5 no-print">
+    <form class="card p-4" id="form" method="post" action="{{ url_for('simpan', jenis=jenis) }}">
+      <h2 class="h6 fw-bold text-primary">Isi Surat</h2>
+      {% for k, label, tipe in tpl.fields %}
+      <div class="mb-2"><label class="form-label small mb-1">{{ label }}</label>
+        {% if tipe == 'textarea' %}<textarea class="form-control" name="{{ k }}" rows="4" required>{{ nilai.get(k, '') }}</textarea>
+        {% else %}<input class="form-control" type="{{ tipe }}" name="{{ k }}" value="{{ nilai.get(k, '') }}" {{ 'min=1' if tipe == 'number' }} required>{% endif %}
+      </div>
+      {% endfor %}
+      <hr><h2 class="h6 fw-bold text-primary">Kop &amp; Tanda Tangan</h2>
+      {% for k, label, tipe in common %}
+      <div class="mb-2"><label class="form-label small mb-1">{{ label }}</label>
+        <input class="form-control" type="{{ tipe }}" name="{{ k }}" value="{{ nilai.get(k, '') }}" {{ 'required' if k == 'ttd_nama' }}></div>
+      {% endfor %}
+      <button class="btn btn-primary btn-lg mt-3"><i class="bi bi-save"></i> Simpan &amp; Buat Nomor Surat</button>
+    </form>
+  </div>
+  <div class="col-lg-7">
+    <div class="small text-muted mb-2 no-print"><i class="bi bi-eye"></i> Pratinjau langsung (kolom kuning = belum diisi)</div>
+    {% include "_kertas.html" %}
+  </div>
+</div>
+<script>
+  const TPL = {{ tpl|tojson }};
+  const form = document.getElementById("form");
+  const perbarui = () => renderKertas(TPL, Object.fromEntries(new FormData(form)));
+  form.addEventListener("input", perbarui);
+  perbarui();
+</script>
+{% endblock %}
